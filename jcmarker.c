@@ -154,7 +154,7 @@ emit_dqt(j_compress_ptr cinfo, int index)
   int prec;
   int i;
 
-  if (qtbl == NULL)
+  if (!Lossless_Decode && qtbl == NULL)
     ERREXIT1(cinfo, JERR_NO_QUANT_TABLE, index);
 
   prec = 0;

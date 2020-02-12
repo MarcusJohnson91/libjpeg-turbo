@@ -76,6 +76,13 @@
 
 #endif
 
+#ifndef C_LOSSLESS_SUPPORTED
+#define C_LOSSLESS_SUPPORTED 1
+_Bool   Lossless_Decode;
+uint8_t Lossless_Predictor;
+uint8_t Lossless_Pt;  // Point Transform
+#endif /* C_LOSSLESS_SUPPORTED */
+
 /*
  * The modules that use fread() and fwrite() always invoke them through
  * these macros.  On some systems you may need to twiddle the argument casts.

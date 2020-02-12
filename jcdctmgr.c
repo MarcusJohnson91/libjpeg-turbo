@@ -245,8 +245,8 @@ start_pass_fdctmgr(j_compress_ptr cinfo)
        ci++, compptr++) {
     qtblno = compptr->quant_tbl_no;
     /* Make sure specified quantization table is present */
-    if (qtblno < 0 || qtblno >= NUM_QUANT_TBLS ||
-        cinfo->quant_tbl_ptrs[qtblno] == NULL)
+    if (!Lossless_Decode && (qtblno < 0 || qtblno >= NUM_QUANT_TBLS ||
+        cinfo->quant_tbl_ptrs[qtblno] == NULL))
       ERREXIT1(cinfo, JERR_NO_QUANT_TABLE, qtblno);
     qtbl = cinfo->quant_tbl_ptrs[qtblno];
     /* Compute divisors for this quant table */

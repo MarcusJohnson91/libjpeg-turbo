@@ -360,15 +360,22 @@ id_found:
 
   /* Collect the additional scan parameters Ss, Se, Ah/Al. */
   INPUT_BYTE(cinfo, c, return FALSE);
-  cinfo->Ss = c;
+    if (Lossless_Decode) {
+        Lossless_Predictor = c;
+    } else {
+        cinfo->Ss = c;
+    }
   INPUT_BYTE(cinfo, c, return FALSE);
   cinfo->Se = c;
   INPUT_BYTE(cinfo, c, return FALSE);
-  cinfo->Ah = (c >> 4) & 15;
-  cinfo->Al = (c     ) & 15;
-
-  TRACEMS4(cinfo, 1, JTRC_SOS_PARAMS, cinfo->Ss, cinfo->Se,
-           cinfo->Ah, cinfo->Al);
+    if (Lossless_Decode) {
+        cinfo->Ah   = (c >> 4) & 15;
+        Lossless_Pt = c & 15;
+    } else {
+        cinfo->Ah = (c >> 4) & 15;
+        cinfo->Al = (c     ) & 15;
+        TRACEMS4(cinfo, 1, JTRC_SOS_PARAMS, cinfo->Ss, cinfo->Se, cinfo->Ah, cinfo->Al);
+    }
 
   /* Prepare to scan data & restart markers */
   cinfo->marker->next_restart_num = 0;
@@ -990,38 +997,49 @@ read_markers(j_decompress_ptr cinfo)
       if (!get_soi(cinfo))
         return JPEG_SUSPENDED;
       break;
-
     case M_SOF0:                /* Baseline */
     case M_SOF1:                /* Extended sequential, Huffman */
       if (!get_sof(cinfo, FALSE, FALSE))
         return JPEG_SUSPENDED;
       break;
-
     case M_SOF2:                /* Progressive, Huffman */
       if (!get_sof(cinfo, TRUE, FALSE))
         return JPEG_SUSPENDED;
       break;
-
     case M_SOF9:                /* Extended sequential, arithmetic */
       if (!get_sof(cinfo, FALSE, TRUE))
         return JPEG_SUSPENDED;
       break;
-
     case M_SOF10:               /* Progressive, arithmetic */
       if (!get_sof(cinfo, TRUE, TRUE))
         return JPEG_SUSPENDED;
       break;
-
+    case M_SOF3: /* Lossless, Huffman */
+      Lossless_Decode = 1;
+      if (!get_sof(cinfo, FALSE, FALSE))
+        return JPEG_SUSPENDED;
+      break;
+    case M_SOF7: /* Differential lossless, Huffman */
+      Lossless_Decode = 1;
+      if (!get_sof(cinfo, FALSE, FALSE))
+        return JPEG_SUSPENDED;
+      break;
+    case M_SOF11: /* Lossless, arithmetic */
+      Lossless_Decode = 1;
+      if (!get_sof(cinfo, FALSE, TRUE))
+        return JPEG_SUSPENDED;
+      break;
+    case M_SOF15: /* Differential lossless, arithmetic */
+      Lossless_Decode = 1;
+      if (!get_sof(cinfo, FALSE, TRUE))
+        return JPEG_SUSPENDED;
+      break;
     /* Currently unsupported SOFn types */
-    case M_SOF3:                /* Lossless, Huffman */
     case M_SOF5:                /* Differential sequential, Huffman */
     case M_SOF6:                /* Differential progressive, Huffman */
-    case M_SOF7:                /* Differential lossless, Huffman */
     case M_JPG:                 /* Reserved for JPEG extensions */
-    case M_SOF11:               /* Lossless, arithmetic */
     case M_SOF13:               /* Differential sequential, arithmetic */
     case M_SOF14:               /* Differential progressive, arithmetic */
-    case M_SOF15:               /* Differential lossless, arithmetic */
       ERREXIT1(cinfo, JERR_SOF_UNSUPPORTED, cinfo->unread_marker);
       break;
 

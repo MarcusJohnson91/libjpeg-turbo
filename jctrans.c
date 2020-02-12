@@ -122,8 +122,8 @@ jpeg_copy_critical_parameters(j_decompress_ptr srcinfo, j_compress_ptr dstinfo)
      * IJG encoder currently cannot duplicate this.
      */
     tblno = outcomp->quant_tbl_no;
-    if (tblno < 0 || tblno >= NUM_QUANT_TBLS ||
-        srcinfo->quant_tbl_ptrs[tblno] == NULL)
+    if (!Lossless_Decode && (tblno < 0 || tblno >= NUM_QUANT_TBLS ||
+        srcinfo->quant_tbl_ptrs[tblno] == NULL))
       ERREXIT1(dstinfo, JERR_NO_QUANT_TABLE, tblno);
     slot_quant = srcinfo->quant_tbl_ptrs[tblno];
     c_quant = incomp->quant_table;
